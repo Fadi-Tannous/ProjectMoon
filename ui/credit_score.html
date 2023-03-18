@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html style="font-size: 16px;" lang="en"><head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="keywords" content="Moon Credit Scoring">
+    <meta name="description" content="">
+    <title>Moon Credit Scoring</title>
+    <link rel="stylesheet" href="/css/nicepage.css" media="screen">
+<link rel="stylesheet" href="/css/Home.css" media="screen">
+    <script class="u-script" type="text/javascript" src="js/jquery.js" defer=""></script>
+    <script class="u-script" type="text/javascript" src="js/nicepage.js" defer=""></script>
+    <meta name="generator" content="Nicepage 4.17.10, nicepage.com">
+    <link id="u-theme-google-font" rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i|Open+Sans:300,300i,400,400i,500,500i,600,600i,700,700i,800,800i">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js"></script>
+    <script src="https://validatejs.org/validate.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Raleway:400,300,600,800,900" rel="stylesheet" type="text/css">
+    <script src="css/progressbar.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script type="application/ld+json">{
+		"@context": "http://schema.org",
+		"@type": "Organization",
+		"name": "Site1"
+}</script>
+    <meta name="theme-color" content="#478ac9">
+    <meta property="og:title" content="Moon Credit Scoring">
+    <meta property="og:description" content="">
+    <meta property="og:type" content="website">
+  </head>
+  <script>
+    function start() {
+      validate.extend(validate.validators.datetime, {
+        parse: function(value, options) {
+          return +moment.utc(value);
+        },
+        format: function(value, options) {
+          var format = options.dateOnly ? "YYYY-MM-DD" : "YYYY-MM-DD hh:mm:ss";
+          return moment.utc(value).format(format);
+        }
+      });
+
+      var constraints = {
+        age: {
+          presence: true,
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 18,
+            lessThanOrEqualTo: 130
+          }
+        },
+        gender: {
+          presence: true
+        },
+        education: {
+          presence: true
+        },
+        maritalstatus: {
+          presence: true
+        },
+        nrdependents: {
+          presence: true,
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 0
+          }
+        },
+        employmentstatus: {
+          presence: true
+        },
+        totalincome: {
+          presence: true,
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 0
+          }
+        },
+        totalliabilities: {
+          presence: true,
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 0
+          }
+        },
+        freecash: {
+          presence: true,
+          numericality: {
+            onlyInteger: true,
+            greaterThanOrEqualTo: 0
+          }
+        }
+      };
+
+      // Hook up the form so we can prevent it from being posted
+      var form = document.querySelector("form#main");
+      form.addEventListener("submit", function(ev) {
+        ev.preventDefault();
+        handleFormSubmit(form);
+      });
+
+      // Hook up the inputs to validate on the fly
+      var inputs = document.querySelectorAll("input, textarea, select")
+      for (var i = 0; i < inputs.length; ++i) {
+        inputs.item(i).addEventListener("change", function(ev) {
+          var errors = validate(form, constraints) || {};
+          showErrorsForInput(this, errors[this.name])
+        });
+      }
+
+      function handleFormSubmit(form, input) {
+        // validate the form against the constraints
+        bar.set(0);
+        var errors = validate(form, constraints);
+        // then we update the form to reflect the results
+        showErrors(form, errors || {});
+        if (!errors) {
+          showSuccess(form);
+        }
+      }
+
+      // Updates the inputs with the validation errors
+      function showErrors(form, errors) {
+        // We loop through all the inputs and show the errors for that input
+        _.each(form.querySelectorAll("input[name], select[name]"), function(input) {
+          // Since the errors can be null if no errors were found we need to handle
+          // that
+          showErrorsForInput(input, errors && errors[input.name]);
+        });
+      }
+
+      // Shows the errors for a specific input
+      function showErrorsForInput(input, errors) {
+        // This is the root of the input
+        var formGroup = closestParent(input.parentNode, "form-group")
+          // Find where the error messages will be insert into
+          , messages = formGroup.querySelector(".messages");
+        // First we remove any old messages and resets the classes
+        resetFormGroup(formGroup);
+        // If we have errors
+        if (errors) {
+          // we first mark the group has having errors
+          formGroup.classList.add("has-error");
+          // then we append all the errors
+          _.each(errors, function(error) {
+            addError(messages, error);
+          });
+        } else {
+          // otherwise we simply mark it as success
+          formGroup.classList.add("has-success");
+        }
+      }
+
+      // Recusively finds the closest parent that has the specified class
+      function closestParent(child, className) {
+        if (!child || child == document) {
+          return null;
+        }
+        if (child.classList.contains(className)) {
+          return child;
+        } else {
+          return closestParent(child.parentNode, className);
+        }
+      }
+
+      function resetFormGroup(formGroup) {
+        // Remove the success and error classes
+        formGroup.classList.remove("has-error");
+        formGroup.classList.remove("has-success");
+        // and remove any old messages
+        _.each(formGroup.querySelectorAll(".help-block.error"), function(el) {
+          el.parentNode.removeChild(el);
+        });
+      }
+
+      // Adds the specified error with the following markup
+      // <p class="help-block error">[message]</p>
+      function addError(messages, error) {
+        var block = document.createElement("p");
+        block.classList.add("help-block");
+        block.classList.add("error");
+        block.setAttribute("style", "margin-top:0px;margin-bottom:0px");
+        block.innerText = error;
+        messages.appendChild(block);
+      }
+
+      function showScore(score_json) {
+        bar.animate(score_json['credit_score']);
+      }
+
+      function showSuccess(form) {
+        map = {'age': 'Age', 'gender': 'Gender', 'education': 'Education', 'maritalstatus': 'MaritalStatus', 'nrdependents': 'NrOfDependants', 'employmentstatus': 'EmploymentStatus', 'employment_duration': 'EmploymentDurationCurrentEmployer', 'workexperience': 'WorkExperience', 'occupationarea': 'OccupationArea', 'homeownership': 'HomeOwnershipType', 'totalincome': 'IncomeTotal', 'totalliabilities': 'LiabilitiesTotal', 'freecash': 'FreeCash'}
+        data = {};
+        _.each(form.querySelectorAll("input[name], select[name]"), function(input) {
+          data[map[input.id]] = input.value
+        });
+        fetch('http://mooncreditscoring.webredirect.org:8090/credit_score?json_data=' + JSON.stringify(data))
+        .then(response => response.json())
+        .then(json => showScore(json));
+      }
+    }
+    var bar;
+    function credit_score_set() {
+      bar = new ProgressBar.Circle("#credit_score_circle", {
+        color: '#000',
+        strokeWidth: 4,
+        trailWidth: 1,
+        easing: 'easeInOut',
+        duration: 1400,
+        trailColor: '#dcdcd',
+        from: { color: '#a11300', width: 1 },
+        to: { color: '#00a128', width: 4 },
+        // Set default step function for all animate calls
+        step: function(state, circle) {
+          circle.path.setAttribute('stroke', state.color);
+          circle.path.setAttribute('stroke-width', state.width);
+          var value = Math.round(circle.value() * 100);
+          if (value === 0) {
+            circle.setText('');
+          } else {
+            circle.setText(value + " %");
+          }
+
+        }
+      });
+      bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+      bar.text.style.fontSize = '1.5rem';
+
+    }
+
+    function fill_select_options() {
+      occupation_Area = {0:"Unknown" ,1: "Other", 2: "Mining", 3: "Processing", 4: "Energy", 5: "Utilities", 6: "Construction", 7: "Retail and wholesale", 8: "Transport and warehousing", 9: "Hospitality and catering", 10: "Info telecom", 11: "Finance insurance", 12: "Real-estate", 13: "Research", 14: "Administrative", 15: "Civil service", 16: "Education", 17: "Healthcare", 18: "Entertainment", 19: "Agriculture"}
+      employment_status = {0: "Unknown", 1: "Unemployed", 2: "Partially employed", 3: "Fully employed", 4: "Self-employed", 5: "Entrepreneur", 6: "Retiree"}
+      country = {"EE": "Estonia", "FI": "Finland", "ES": "Spain", "SK": "Slovakia", "NL": "Netherlands"}
+      gender = {0:"Male", 1: "Female", 2: "Unknown"}
+      education = {1:"Primary education", 2: "Basic education", 3: "Vocational education", 4: "Secondary education", 5: "Higher education"}
+      marital_status = {1: "Married", 2: "Cohabitant", 3: "Single", 4: "Divorced", 5: "Widow"}
+      home_ownership = {0: "Homeless", 1: "Owner", 2: "Living with parents", 3: "Tenant pre-furnished property", 4: "Tenant unfurnished property", 5: "Council house", 6: "Joint tenant", 7: "Joint ownership", 8: "Mortgage", 9: "Owner with encumbrance", 10: "Other"}
+      employment_duration = {'UpTo4Years': 'UpTo4Years','Unknown': 'Unknown','UpTo5Years': 'UpTo5Years','UpTo1Year': 'UpTo1Year','MoreThan5Years': 'MoreThan5Years','UpTo2Years': 'UpTo2Years','UpTo3Years': 'UpTo3Years','TrialPeriod': 'TrialPeriod','Retiree': 'Retiree','Other': 'Other'}
+      work_experience = {'15To25Years': '15To25Years','10To15Years': '10To15Years','2To5Years': '2To5Years','LessThan2Years': 'LessThan2Years','MoreThan25Years': 'MoreThan25Years','5To10Years': '5To10Years', 'Unknown': 'Unknown'}
+
+      translator = {'OccupationArea': occupation_Area, 'EmploymentStatus': employment_status, 'Country': country, 'Gender': gender,'Education': education, 'MaritalStatus': marital_status, 'HomeOwnershipType': home_ownership, 'employment_duration': employment_duration, 'WorkExperience': work_experience}
+
+      selectors = {'Gender': 'gender', 'Education': 'education', 'MaritalStatus': 'maritalstatus', 'EmploymentStatus': 'employmentstatus', 'employment_duration': 'employment_duration', 'WorkExperience': 'workexperience', 'OccupationArea': 'occupationarea', 'HomeOwnershipType':'homeownership'}
+      Object.entries(selectors).forEach(([key, value]) => {
+        userid_select = document.querySelector('select#'+value);
+        Object.entries(translator[key]).forEach(([key, value]) => {
+          userid_select.add(new Option(value, key), undefined);
+        });
+      });
+    }
+
+    window.onload = function(){
+      start();
+      credit_score_set();
+      fill_select_options();
+    }
+  </script>
+  <body data-home-page="index.html" data-home-page-title="Moon Credit Scoring - Users" class="u-body u-xl-mode" data-lang="en">
+
+    <header class="u-clearfix u-header u-header u-sticky" id="sec-53ec"><div class="u-clearfix u-sheet u-sheet-1">
+        <nav class="u-menu u-menu-one-level u-offcanvas u-menu-1">
+          <div class="menu-collapse" style="font-size: 1rem; letter-spacing: 0px;">
+            <a class="u-button-style u-custom-left-right-menu-spacing u-custom-padding-bottom u-custom-top-bottom-menu-spacing u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="#">
+              <svg class="u-svg-link" viewBox="0 0 24 24"><use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#menu-hamburger"></use></svg>
+              <svg class="u-svg-content" version="1.1" id="menu-hamburger" viewBox="0 0 16 16" x="0px" y="0px" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg"><g><rect y="1" width="16" height="2"></rect><rect y="7" width="16" height="2"></rect><rect y="13" width="16" height="2"></rect>
+</g></svg>
+            </a>
+          </div>
+          <div class="u-custom-menu u-nav-container">
+            <ul class="u-nav u-unstyled u-nav-1"><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="index.html" style="padding: 10px 20px;">Home</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="users.html" style="padding: 10px 20px;">Users</a>
+</li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="credit_score.html" style="padding: 10px 20px;">Credit Score</a>
+</li>  <li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="crif_demo.html" style="padding: 10px 20px;">Crif Demo</a></li><li class="u-nav-item"><a class="u-button-style u-nav-link u-text-active-palette-1-base u-text-hover-palette-2-base" href="team.html" style="padding: 10px 20px;">Team</a>
+</li></ul>
+          </div>
+          <div class="u-custom-menu u-nav-container-collapse">
+            <div class="u-black u-container-style u-inner-container-layout u-opacity u-opacity-95 u-sidenav">
+              <div class="u-inner-container-layout u-sidenav-overflow">
+                <div class="u-menu-close"></div>
+                <ul class="u-align-center u-nav u-popupmenu-items u-unstyled u-nav-2"><li class="u-nav-item"><a class="u-button-style u-nav-link" href="index.html">Home</a>
+                </li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="users.html">Users</a>
+                </li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="credit_score.html">Credit Score</a>
+                </li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="crif_demo.html">Crif Demo</a>
+                </li><li class="u-nav-item"><a class="u-button-style u-nav-link" href="team.html">Team</a>
+                </li></ul>
+              </div>
+            </div>
+            <div class="u-black u-menu-overlay u-opacity u-opacity-70"></div>
+          </div>
+        </nav>
+        <h1 onclick="location.href='/index.html';" class="clickable-header u-text u-text-default u-title u-text-1">Moon Credit Scoring</h1>
+      </div></header>
+    <section class="u-align-center u-clearfix u-section-1" id="sec-f049">
+      <div class="u-clearfix u-sheet u-sheet-1">
+        <div class="u-expanded-width u-list u-list-1">
+           <div class="u-layout" style="">
+              <div class="u-align-center u-container-style u-layout-cell u-left-cell u-size-49 u-size-xs-60 u-grey-5 u-layout-cell-1" src="">
+                <div class="u-container-layout u-valign-middle u-container-layout-1">
+                <form id="main" class="form-horizontal" action="/example" method="post" novalidate>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="age">Age</label>
+                    <div class="col-sm-3">
+                      <input id="age" class="form-control" type="number" placeholder="age" name="age">
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="gender">Gender</label>
+                    <div class="col-sm-3">
+                      <select id="gender" class="form-control" name="gender">
+                      </select>
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="education">Education</label>
+                    <div class="col-sm-3">
+                      <select id="education" class="form-control" name="education">
+                      </select>
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="maritalstatus">Marital Status</label>
+                    <div class="col-sm-3">
+                      <select id="maritalstatus" class="form-control" name="maritalstatus">
+                      </select>
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="nrdependents"># Dependents</label>
+                    <div class="col-sm-3">
+                      <input id="nrdependents" class="form-control" type="number" placeholder="# Dependents" name="nrdependents">
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="employmentstatus">Employment Status</label>
+                    <div class="col-sm-3">
+                      <select id="employmentstatus" class="form-control" name="employmentstatus">
+                      </select>
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="employment_duration">Employment Duration</label>
+                    <div class="col-sm-3">
+                      <select id="employment_duration" class="form-control" name="employment_duration">
+                      </select>
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="workexperience">Work Experience</label>
+                    <div class="col-sm-3">
+                      <select id="workexperience" class="form-control" name="workexperience">
+                      </select>
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="occupationarea">Occupation Area</label>
+                    <div class="col-sm-3">
+                      <select id="occupationarea" class="form-control" name="occupationarea">
+                      </select>
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="homeownership">Home Ownership Type</label>
+                    <div class="col-sm-3">
+                      <select id="homeownership" class="form-control" name="homeownership">
+                      </select>
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="totalincome">Total Income</label>
+                    <div class="col-sm-3">
+                      <input id="totalincome" class="form-control" type="number" placeholder="total income" name="totalincome">
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="totalliabilities">Total Liabilities</label>
+                    <div class="col-sm-3">
+                      <input id="totalliabilities" class="form-control" type="number" placeholder="total liabilities" name="totalliabilities">
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div class="form-group">
+                    <label class="col-sm-3 control-label" for="freecash">Free Cash</label>
+                    <div class="col-sm-3">
+                      <input id="freecash" class="form-control" type="number" placeholder="free cash" name="freecash">
+                    </div>
+                    <div class="col-sm-6 messages"></div>
+                  </div>
+                  <div style="margin-top: 3.5%; margin-bottom: 0px; margin-right: 10%;" class="form-group">
+                    <div class="col-sm-10">
+                      <button type="submit" class="btn btn-default">Calculate Credit Score</button>
+                    </div>
+                  </div>
+                </form>
+                </div>
+                  <div style="width: 20%;height: 20%;margin-top:15em;padding-right:2%" class="credit_score_circle" id="credit_score_circle">
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    
+    <footer class="u-align-center u-clearfix u-footer u-grey-80 u-footer u-sticky" id="sec-d19c"><div class="u-align-left u-clearfix u-sheet u-valign-middle u-sheet-1">
+        <h3 class="u-headline u-text u-text-default u-text-1">
+          <a>By ST Technologies™</a>
+        </h3>
+      </div></footer>
+  
+</body></html>
+
+
